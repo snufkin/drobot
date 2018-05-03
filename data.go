@@ -18,6 +18,10 @@ type SemVersion struct {
 	Patch int64
 }
 
+type Manifest struct {
+	Components []Component
+}
+
 const CORE = "core"
 const MODULE = "module"
 const THEME = "theme"
@@ -69,4 +73,8 @@ func (V *SemVersion) init(rawVersion string) {
 		fmt.Sscanf(parts[1], "%d", &V.Minor)
 		fmt.Sscanf(parts[2], "%d", &V.Patch)
 	}
+}
+
+// Collect a manifest list.
+func (M *Manifest) append(component Component) {
 }

@@ -112,13 +112,11 @@ func (V *SemVersion) initContrib(coreVersion int, rawVersion string) {
 	}
 }
 
-func (C *Component) init(rawBlock string) {
+// Build a list of deduped project names out of a raw projects[name] block.
+func componentList(rawBlock string) (componentList []string) {
 	components := make(map[string]bool)
-
-	//1. Identify the names of the projects
-	//2. Extract all variations of keys (assumption and may break)
-
 	scanner := bufio.NewScanner(strings.NewReader(rawBlock))
+
 	for scanner.Scan() {
 		key := keyMapper(scanner.Text())
 
@@ -128,7 +126,41 @@ func (C *Component) init(rawBlock string) {
 			components[key] = true
 		}
 	}
-	fmt.Println(components)
+	for name, _ := range components {
+		componentList = append(componentList, name)
+	}
+	return
+}
+
+// Find a code block which contains a certain component key.
+func findBlock(component string) (componentBlock string) {
+	scanner := bufio.NewScanner(strings.NewReader(componentBlock))
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		// Find a line which contains our keyword.
+		if match := strings.Index(line, fmt.Sprintf("projects[%s]", component)); match > -1 {
+			component += line + "\n"
+		}
+	}
+	return
+}
+
+// Prepare a component with various conditional initialisers.
+func (C *Component) init(version string, subdir string, componentType string) {
+}
+
+func (M *Manifest) init(rawBlock string) {
+	//1. Identify the names of the projects
+	//2. Extract all variations of keys (assumption and may break)
+	componentList := componentList(rawBlock)
+
+	for _, component := range componentList {
+		block := findBlock(component)
+		println(block)
+	}
+	// Find the string block that contains each components and initialise the component.
+
 }
 
 // Collect a manifest list.

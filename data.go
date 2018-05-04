@@ -13,9 +13,10 @@ type Component struct {
 }
 
 type SemVersion struct {
-	Major int64 // Used as the core version for contrib
-	Minor int64
-	Patch int64
+	Major int // Used as the core version for contrib
+	Minor int
+	Patch int
+	Tag   string
 }
 
 type Manifest struct {
@@ -27,7 +28,7 @@ const MODULE = "module"
 const THEME = "theme"
 
 // Convert a semantic version to the d.o format.
-func (V SemVersion) printVersion(componentType string, majorVersion int64) string {
+func (V SemVersion) printVersion(componentType string, majorVersion int) string {
 	if V.Major < 0 || V.Minor < 0 || V.Patch < 0 {
 		return fmt.Sprintf("Invalid version")
 	}
@@ -50,7 +51,7 @@ func (C Component) printVersion() string {
 	return C.Version.printVersion(C.Type, C.Version.Major)
 }
 
-func parseVersion(rawVersion string, majorVersion int64) SemVersion {
+func parseVersion(rawVersion string, majorVersion int) SemVersion {
 	version := new(SemVersion)
 	if majorVersion == 7 {
 		fmt.Sscanf(rawVersion, "%d.%d", &version.Major, &version.Minor)
@@ -58,7 +59,7 @@ func parseVersion(rawVersion string, majorVersion int64) SemVersion {
 	return *version
 }
 
-func (V *SemVersion) init(rawVersion string) {
+func (V *SemVersion) initCore(rawVersion string) {
 	parts := strings.Split(rawVersion, ".")
 
 	if len(parts) < 1 || len(parts) > 3 { // Invalid input parses to -1
@@ -73,6 +74,45 @@ func (V *SemVersion) init(rawVersion string) {
 		fmt.Sscanf(parts[1], "%d", &V.Minor)
 		fmt.Sscanf(parts[2], "%d", &V.Patch)
 	}
+}
+
+// Parser behaves differently for different core versions.
+func (V *SemVersion) initContrib(coreVersion int, rawVersion string) {
+	parts := strings.Split(rawVersion, ".")
+
+	if len(parts) < 1 || len(parts) > 3 { // Invalid input parses to -1
+		V.Major, V.Minor, V.Patch = -1, -1, -1
+		return
+	}
+
+	V.Major = coreVersion
+
+	if coreVersion == 7 {
+		patch := strings.Split(parts[1], "-")
+
+		// When no patch version is pinned.
+		if patch[0] == "x" {
+			V.Patch = -1
+		} else {
+			fmt.Sscanf(patch[0], "%d", &V.Patch)
+		}
+		fmt.Sscanf(parts[0], "%d", &V.Minor)
+		if len(patch) == 2 {
+			fmt.Sscanf(patch[1], "%s", &V.Tag)
+		}
+	} else { // Core: 8, parse the semver from composer.lock (patch is discarded there).
+		patch := strings.Split(parts[2], "-")
+		fmt.Sscanf(parts[0], "%d", &V.Minor)
+		fmt.Sscanf(parts[1], "%d", &V.Patch)
+
+		if len(patch) == 2 {
+			fmt.Sscanf(patch[1], "%s", &V.Tag)
+		}
+	}
+}
+
+func (C *Component) init(rawBlock string) {
+
 }
 
 // Collect a manifest list.

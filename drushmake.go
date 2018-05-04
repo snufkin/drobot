@@ -22,18 +22,16 @@ func parseMakefile(filePath string) {
 		// fmt.Println(keyMapper(key))
 		if componentName := keyMapper(key); componentName != "" && val != "core" {
 			componentList = append(componentList, componentName)
-
 			// fmt.Printf("%v => %v\n", componentName, val)
 		}
 	}
-	fmt.Println(componentList)
 
 	// Grab core information
-	rawCoreVersion := cfg.Section("").Key("core")
+	// rawCoreVersion := cfg.Section("").Key("core")
 	// core := Component{CORE, "drupal", parseVersion(rawCoreVersion.Value(), 7)}
 
-	version := SemVersion{}
-	version.init(rawCoreVersion.Value())
+	// version := SemVersion{}
+	// version.init(rawCoreVersion.Value())
 	// core := Component{CORE, "drupal", version}
 
 	// fmt.Printf("%v\n", core.printVersion())

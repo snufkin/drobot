@@ -31,7 +31,7 @@ var testContribVersions = []struct {
 	out     SemVersion
 	success bool
 }{
-	{7, "2.0beta1", SemVersion{7, 2, 0, ""}, false}, // No dash.
+	{7, "2.0beta1", SemVersion{7, 2, 0, ""}, false}, // No dash, no success.
 	{7, "1.0-rc1", SemVersion{7, 1, 0, "rc1"}, true},
 	{7, "2.x-dev", SemVersion{7, 2, -1, "dev"}, true},
 	{7, "2.x-dev", SemVersion{7, 2, -1, ""}, false},
@@ -41,12 +41,14 @@ var testContribVersions = []struct {
 }
 
 // Project was cloned from git and is not pinned to a hash.
-var componentBlockGit = `projects[ns_core][type] = module
+var componentBlockGit = `
+projects[ns_core][type] = module
 projects[ns_core][download][type] = git
 projects[ns_core][download][branch] = 7.x-2.x`
 
 // Project was cloned from git and it is pinned to a hash.
-var componentBlockGitHash = `projects[draggableviews][type] = module
+var componentBlockGitHash = `
+projects[draggableviews][type] = module
 projects[draggableviews][download][type] = git
 projects[draggableviews][download][revision] = 9677bc18b7255e13c33ac3cca48732b855c6817d
 projects[draggableviews][download][branch] = 7.x-2.x`

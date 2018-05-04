@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"strings"
 )
@@ -112,7 +113,22 @@ func (V *SemVersion) initContrib(coreVersion int, rawVersion string) {
 }
 
 func (C *Component) init(rawBlock string) {
+	components := make(map[string]bool)
 
+	//1. Identify the names of the projects
+	//2. Extract all variations of keys (assumption and may break)
+
+	scanner := bufio.NewScanner(strings.NewReader(rawBlock))
+	for scanner.Scan() {
+		key := keyMapper(scanner.Text())
+
+		if key == "" { // Skip empty lines.
+			continue
+		} else if _, no := components[key]; key != "" && !bool(no) {
+			components[key] = true
+		}
+	}
+	fmt.Println(components)
 }
 
 // Collect a manifest list.

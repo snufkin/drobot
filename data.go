@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"strings"
 )
@@ -27,6 +26,8 @@ type Manifest struct {
 const CORE = "core"
 const MODULE = "module"
 const THEME = "theme"
+const MANIFEST_MAKE = "make"
+const MANIFEST_COMPOSER = "json"
 
 // Convert a semantic version to the d.o format.
 func (V SemVersion) printVersion(componentType string, majorVersion int) string {
@@ -112,45 +113,19 @@ func (V *SemVersion) initContrib(coreVersion int, rawVersion string) {
 	}
 }
 
-// Build a list of deduped project names out of a raw projects[name] block.
-func componentList(rawBlock string) (componentList []string) {
-	components := make(map[string]bool)
-	scanner := bufio.NewScanner(strings.NewReader(rawBlock))
-
-	for scanner.Scan() {
-		key := keyMapper(scanner.Text())
-
-		if key == "" { // Skip empty lines.
-			continue
-		} else if _, no := components[key]; key != "" && !bool(no) {
-			components[key] = true
-		}
-	}
-	for name, _ := range components {
-		componentList = append(componentList, name)
-	}
-	return
-}
-
-// Find a code block which contains a certain component key.
-func findBlock(component string) (componentBlock string) {
-	scanner := bufio.NewScanner(strings.NewReader(componentBlock))
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		// Find a line which contains our keyword.
-		if match := strings.Index(line, fmt.Sprintf("projects[%s]", component)); match > -1 {
-			component += line + "\n"
-		}
-	}
-	return
-}
-
 // Prepare a component with various conditional initialisers.
-func (C *Component) init(version string, subdir string, componentType string) {
+func (C *Component) init(coreVersion int, rawVersion string, componentType string) {
+	switch componentType {
+	case CORE:
+		C.Version.initCore(rawVersion)
+	case MODULE:
+	case THEME:
+		C.Version.initContrib(coreVersion, rawVersion)
+	}
 }
 
-func (M *Manifest) init(rawBlock string) {
+// Initialise a manifest list out of the raw txt from the yaml file.
+func (M *Manifest) initFromMake(rawBlock string) {
 	//1. Identify the names of the projects
 	//2. Extract all variations of keys (assumption and may break)
 	componentList := componentList(rawBlock)

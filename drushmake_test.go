@@ -113,11 +113,7 @@ var testComponentBlocks = []struct {
 	},
 }
 
-var testComponentList = struct {
-	in  string
-	out []string
-}{
-	in: `projects[media] = 2.x-dev
+var testMakefile string = `projects[media] = 2.x-dev
 projects[media_youtube][version] = 1.0-alpha5
 projects[media_youtube][subdir] = media_plugins
 projects[media_flickr][version] = 1.0-alpha1
@@ -127,12 +123,34 @@ projects[rubik][patch][] = "http://drupal.org/files/rubik-print-css.patch"
 projects[nodequeue][subdir] = contrib
 projects[nodequeue][version] = 2.0-alpha1
 projects[nodequeue][patch][] = "http://drupal.org/files/issues/1023606-qid-to-name-6.patch"
-projects[nodequeue][patch][] = "http://drupal.org/files/issues/nodequeue_d7_autocomplete-872444-6.patch"`,
+projects[nodequeue][patch][] = "http://drupal.org/files/issues/nodequeue_d7_autocomplete-872444-6.patch"`
+
+var testFullComponentList = struct {
+	in  string
+	out Manifest
+}{
+	in: testMakefile,
+	out: Manifest{
+		[]Component{
+			Component{"module", "media", SemVersion{7, 2, -1, "dev"}},
+			Component{"module", "media_youtube", SemVersion{7, 1, 0, "alpha5"}},
+			Component{"module", "media_flickr", SemVersion{7, 1, 0, "alpha1"}},
+			Component{"theme", "rubik", SemVersion{7, 4, 0, "beta7"}},
+			Component{"module", "nodequeue", SemVersion{7, 2, 0, "alpha1"}},
+		},
+	},
+}
+
+var testComponentList = struct {
+	in  string
+	out []string
+}{
+	in:  testMakefile,
 	out: []string{"media", "media_youtube", "media_flickr", "rubik", "nodequeue"},
 }
 
 func TestComponentListParser(t *testing.T) {
-	if components := componentList(testComponentList.in); reflect.DeepEqual(components, testComponentList.out) {
+	if components := componentList(testComponentList.in); !reflect.DeepEqual(components, testComponentList.out) {
 		t.Error("For", testComponentList.in, "expected", testComponentList.out, "got", components)
 	}
 }
@@ -140,11 +158,11 @@ func TestComponentListParser(t *testing.T) {
 // Test if component blocks are correctly parsed and populated.
 func TestComponentBlockParser(t *testing.T) {
 	for _, testBlock := range testComponentBlocks {
-		b := Component{}
 		// First pass the snippet to the block parser.
-		b.init(testBlock.in)
-		if success := (b == testBlock.out); b != testBlock.out && success != testBlock.success {
-			t.Error("For", testBlock.in, "expected", testBlock.out, "got", b)
+		testComponent := Component{}
+		testComponent.blockParser(testBlock.in, 7)
+		if success := (testComponent == testBlock.out); testComponent != testBlock.out && success != testBlock.success {
+			t.Error("For", testBlock.in, "expected", testBlock.out, "got", testComponent)
 		}
 
 	}

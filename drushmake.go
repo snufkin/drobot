@@ -47,37 +47,28 @@ func keyMapper(key string) string {
 	}
 }
 
-// Parse a block which belongs to a component and assign the results to a full Component object.
-func (C *Component) blockParser(block string, core int) {
+// Parse a string block which belongs to a single component and return the Component.
+func (C *Component) blockToComponentParser(block string, coreVersion int) {
+	C.Name = keyMapper(block)
 
-	nr := strings.Count(block, "\n")
+	scanner := bufio.NewScanner(strings.NewReader(block))
+	for scanner.Scan() {
+		// Split the string along the = symbol.
+		lineParts := strings.Split(scanner.Text(), " = ")
 
-	cfg, err := ini.Load(block)
-	if err != nil {
-		fmt.Errorf("failed to parse block")
+		// Multi-line version definition
+		if key := strings.Replace(lineParts[0], "projects["+C.Name+"]", "", 1); key != "" {
+		} else {
+			C.init(coreVersion, lineParts[1], MODULE)
+		}
 	}
 
-	name := keyMapper(block)
-	fmt.Println(name)
-	version, _ := cfg.Section("").GetKey("projects[" + name + "]")
-	fmt.Println(version)
-
-	if nr == 1 {
-	}
-
-	// switch nr {
-	// case 1:
-	// 	name := keyMapper(block)
-	// 	version, _ := cfg.Section("").GetKey("projects[" + name + "]")
-	// 	fmt.Println(version)
-	// }
 	// Structure variations:
 	// 1. oneliner with version
 	// 2. multiple lines with explicit version
 	// 3. multiple lines with git
 	// 3. multiple lines with git and hah
 	// 5. multiple lines with dev version
-	// component.init("3.4", "module")
 }
 
 // Helper function to determine the applicable structure.

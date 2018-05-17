@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -80,37 +82,48 @@ func (V *SemVersion) initCore(rawVersion string) {
 
 // Parser behaves differently for different core versions.
 func (V *SemVersion) initContrib(coreVersion int, rawVersion string) {
-	parts := strings.Split(rawVersion, ".")
+	var versionMatches = map[string]string{
+		"PARTIAL-STABLE":   `^(\d+)\.(\d+)$`,              // E.g. 3.2
+		"PARTIAL-TEST":     `^(\d+)\.(\d+)-(\S+)$`,        // E.g. 4.0-beta7
+		"PARTIAL-DEV":      `^(\d+)\.x-dev$`,              // E.g. 5.x-dev
+		"DRUPAL-STABLE":    `^\d+\.x-(\d+)\.(\d+)$`,       // E.g. 7.x-4.3
+		"DRUPAL-TEST":      `^\d+\.x-(\d+)\.(\d+)-(\S+)$`, // E.g. 7.x-4.3-beta1
+		"DRUPAL-DRUSH-DEV": `^\d+\.x-(\d+)\.x$`,           // E.g. 7.x-2.x
+		"DRUPAL-DEV":       `^\d+\.x-(\d+)\.x-dev$`,       // E.g. 7.x-2.x-dev
+		"COMPOSER-STABLE":  `^(\d+)\.(\d+)\.\d+$`,         // E.g. 1.1.0
+		"COMPOSER-TEST":    `^(\d+)\.(\d+)\.\d+-(\S+)$`,   // E.g. 1.1.0-beta1
+	}
 
-	if len(parts) < 1 || len(parts) > 3 { // Invalid input parses to -1
+	V.Major, V.Tag = coreVersion, ""
+
+	foundMatch := false
+	for vType, expression := range versionMatches {
+		re := regexp.MustCompile(expression)
+		if isMatch := re.MatchString(rawVersion); isMatch {
+			matches := re.FindStringSubmatch(rawVersion)
+
+			switch vType {
+			case "PARTIAL-STABLE", "DRUPAL-STABLE", "COMPOSER-STABLE":
+				V.Minor, _ = strconv.Atoi(matches[1])
+				V.Patch, _ = strconv.Atoi(matches[2])
+				foundMatch = true
+			case "PARTIAL-TEST", "DRUPAL-TEST", "COMPOSER-TEST":
+				V.Minor, _ = strconv.Atoi(matches[1])
+				V.Patch, _ = strconv.Atoi(matches[2])
+				V.Tag = matches[3]
+				foundMatch = true
+			case "PARTIAL-DEV", "DRUPAL-DRUSH-DEV", "DRUPAL-DEV":
+				V.Minor, _ = strconv.Atoi(matches[1])
+				V.Patch, V.Tag = -1, "dev"
+				foundMatch = true
+			}
+		}
+	}
+
+	if !foundMatch {
 		V.Major, V.Minor, V.Patch = -1, -1, -1
-		return
 	}
-
-	V.Major = coreVersion
-
-	if coreVersion == 7 {
-		patch := strings.Split(parts[1], "-")
-
-		// When no patch version is pinned.
-		if patch[0] == "x" {
-			V.Patch = -1
-		} else {
-			fmt.Sscanf(patch[0], "%d", &V.Patch)
-		}
-		fmt.Sscanf(parts[0], "%d", &V.Minor)
-		if len(patch) == 2 {
-			fmt.Sscanf(patch[1], "%s", &V.Tag)
-		}
-	} else { // Core: 8, parse the semver from composer.lock (patch is discarded there).
-		patch := strings.Split(parts[2], "-")
-		fmt.Sscanf(parts[0], "%d", &V.Minor)
-		fmt.Sscanf(parts[1], "%d", &V.Patch)
-
-		if len(patch) == 2 {
-			fmt.Sscanf(patch[1], "%s", &V.Tag)
-		}
-	}
+	return
 }
 
 // Prepare a component with various conditional initialisers.

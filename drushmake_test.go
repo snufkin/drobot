@@ -32,6 +32,7 @@ var testContribVersions = []struct {
 	out     SemVersion
 	success bool
 }{
+	{7, "3.4", SemVersion{7, 3, 4, ""}, true},
 	{7, "2.0beta1", SemVersion{7, 2, 0, ""}, false}, // No dash, no success.
 	{7, "1.0-rc1", SemVersion{7, 1, 0, "rc1"}, true},
 	{7, "2.x-dev", SemVersion{7, 2, -1, "dev"}, true},
@@ -42,25 +43,21 @@ var testContribVersions = []struct {
 }
 
 // Project was cloned from git and is not pinned to a hash.
-var componentBlockGit = `
-projects[ns_core][type] = module
+var componentBlockGit = `projects[ns_core][type] = module
 projects[ns_core][download][type] = git
 projects[ns_core][download][branch] = 7.x-2.x`
 
 // Project was cloned from git and it is pinned to a hash.
-var componentBlockGitHash = `
-projects[draggableviews][type] = module
+var componentBlockGitHash = `projects[draggableviews][type] = module
 projects[draggableviews][download][type] = git
 projects[draggableviews][download][revision] = 9677bc18b7255e13c33ac3cca48732b855c6817d
 projects[draggableviews][download][branch] = 7.x-2.x`
 
 // Project is pinned to a stable version on a single line. Test assumes to know core version.
-var componentBlockVersionOneLine = `
-projects[views] = 3.1`
+var componentBlockVersionOneLine = `projects[views] = 3.1`
 
 // Project is pinned to a stable version on multiple lines.
-var componentBlockVersionMultiLine = `
-projects[nodequeue][subdir] = contrib
+var componentBlockVersionMultiLine = `projects[nodequeue][subdir] = contrib
 projects[nodequeue][version] = 2.0-alpha1
 projects[nodequeue][patch][] = "http://drupal.org/files/issues/1023606-qid-to-name-6.patch"
 projects[nodequeue][patch][] = "http://drupal.org/files/issues/nodequeue_d7_autocomplete-872444-6.patch"`
@@ -149,18 +146,20 @@ var testComponentList = struct {
 	out: []string{"media", "media_youtube", "media_flickr", "rubik", "nodequeue"},
 }
 
-func TestComponentListParser(t *testing.T) {
+// Test the processing of the complete string block.
+func TestMakefileToComponentParser(t *testing.T) {
+	t.Skip("Skipping test in debug mode")
 	if components := componentList(testComponentList.in); !reflect.DeepEqual(components, testComponentList.out) {
 		t.Error("For", testComponentList.in, "expected", testComponentList.out, "got", components)
 	}
 }
 
 // Test if component blocks are correctly parsed and populated.
-func TestComponentBlockParser(t *testing.T) {
+func TestBlockToComponentParser(t *testing.T) {
 	for _, testBlock := range testComponentBlocks {
 		// First pass the snippet to the block parser.
 		testComponent := Component{}
-		testComponent.blockParser(testBlock.in, 7)
+		testComponent.blockToComponentParser(testBlock.in, 7)
 		if success := (testComponent == testBlock.out); testComponent != testBlock.out && success != testBlock.success {
 			t.Error("For", testBlock.in, "expected", testBlock.out, "got", testComponent)
 		}

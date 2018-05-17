@@ -186,7 +186,7 @@ func TestCoreVersionParser(t *testing.T) {
 func TestContribVersionParser(t *testing.T) {
 	for _, testV := range testContribVersions {
 		v := SemVersion{}
-		v.initContrib(testV.core, testV.in)
+		v.initContribVersion(testV.core, testV.in)
 		if success := (v == testV.out); v != testV.out && success != testV.success {
 			t.Error(
 				"For", testV.in,

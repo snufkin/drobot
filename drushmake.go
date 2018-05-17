@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/go-ini/ini"
+	"regexp"
 	"strings"
 )
 
@@ -49,19 +50,52 @@ func keyMapper(key string) string {
 
 // Parse a string block which belongs to a single component and return the Component.
 func (C *Component) blockToComponentParser(block string, coreVersion int) {
-	C.Name = keyMapper(block)
+	var versionLocation = map[string]string{
+		"BASIC":    `^projects\[(\w+)\]\s?=\s?(\S+)$`,                         // projects[views] = 3.14
+		"VERSION":  `^projects\[(\w+)\]\[version\]\s?=\s?(\S+)$`,              // projects[nodequeue][version] = 2.0-alpha1
+		"BRANCH":   `^projects\[(\w+)\]\[download\]\[branch\]\s?=\s?(\S+)$`,   // projects[ns_core][download][branch] = 7.x-2.x
+		"REVISION": `^projects\[(\w+)\]\[download\]\[revision\]\s?=\s?(\S+)$`, // projects[draggableviews][download][revision] = 9677bc18b7255e13c33ac3cca48732b855c6817d
+	}
+
+	componentName := keyMapper(block)
+	var version string
+	var revision string
 
 	scanner := bufio.NewScanner(strings.NewReader(block))
 	for scanner.Scan() {
-		// Split the string along the = symbol.
-		lineParts := strings.Split(scanner.Text(), " = ")
+		line := scanner.Text()
 
-		// Multi-line version definition
-		if key := strings.Replace(lineParts[0], "projects["+C.Name+"]", "", 1); key != "" {
-		} else {
-			C.init(coreVersion, lineParts[1], MODULE)
+		for rowType, expression := range versionLocation {
+			re := regexp.MustCompile(expression)
+			if isMatch := re.MatchString(line); isMatch {
+				matches := re.FindStringSubmatch(line)
+
+				// Sanity check for entries not for a single project.
+				if matches[1] != componentName {
+					continue
+				}
+
+				// Do not overwrite the version variable when the revision value is captured.
+				if rowType == "REVISION" {
+					revision = matches[2]
+				} else {
+					version = matches[2]
+				}
+
+				// Make adjustments to the processed variables based on aggreageted information.
+				if rowType == "BRANCH" {
+					version = version + "-git"
+				}
+
+				fmt.Println(matches)
+			}
 		}
 	}
+	if revision != "" {
+		version = version + "-git:" + revision
+	}
+
+	C.init(coreVersion, version, componentName, MODULE)
 
 	// Structure variations:
 	// 1. oneliner with version

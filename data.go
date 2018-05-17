@@ -81,17 +81,18 @@ func (V *SemVersion) initCore(rawVersion string) {
 }
 
 // Parser behaves differently for different core versions.
-func (V *SemVersion) initContrib(coreVersion int, rawVersion string) {
+func (V *SemVersion) initContribVersion(coreVersion int, rawVersion string) {
 	var versionMatches = map[string]string{
-		"PARTIAL-STABLE":   `^(\d+)\.(\d+)$`,              // E.g. 3.2
-		"PARTIAL-TEST":     `^(\d+)\.(\d+)-(\S+)$`,        // E.g. 4.0-beta7
-		"PARTIAL-DEV":      `^(\d+)\.x-dev$`,              // E.g. 5.x-dev
-		"DRUPAL-STABLE":    `^\d+\.x-(\d+)\.(\d+)$`,       // E.g. 7.x-4.3
-		"DRUPAL-TEST":      `^\d+\.x-(\d+)\.(\d+)-(\S+)$`, // E.g. 7.x-4.3-beta1
-		"DRUPAL-DRUSH-DEV": `^\d+\.x-(\d+)\.x$`,           // E.g. 7.x-2.x
-		"DRUPAL-DEV":       `^\d+\.x-(\d+)\.x-dev$`,       // E.g. 7.x-2.x-dev
-		"COMPOSER-STABLE":  `^(\d+)\.(\d+)\.\d+$`,         // E.g. 1.1.0
-		"COMPOSER-TEST":    `^(\d+)\.(\d+)\.\d+-(\S+)$`,   // E.g. 1.1.0-beta1
+		"PARTIAL-STABLE":  `^(\d+)\.(\d+)$`,              // E.g. 3.2
+		"PARTIAL-TEST":    `^(\d+)\.(\d+)-(\w+)$`,        // E.g. 4.0-beta7
+		"PARTIAL-DEV":     `^(\d+)\.x-(\w+)$`,            // E.g. 5.x-dev
+		"DRUPAL-STABLE":   `^\d+\.x-(\d+)\.(\d+)$`,       // E.g. 7.x-4.3
+		"DRUPAL-TEST":     `^\d+\.x-(\d+)\.(\d+)-(\w+)$`, // E.g. 7.x-4.3-beta1
+		"DRUPAL-DRUSH":    `^\d+\.x-(\d+)\.x$`,           // E.g. 7.x-2.x
+		"DRUPAL-DEV":      `^\d+\.x-(\d+)\.x-(dev|git)$`, // E.g. 7.x-2.x-dev/git (prepared)
+		"GIT-HASH":        `^\d+\.x-(\d+)\.x-(git:\w+)$`, // E.g. 7.x-2.x-git:<long hash> (prepared)
+		"COMPOSER-STABLE": `^(\d+)\.(\d+)\.\d+$`,         // E.g. 1.1.0
+		"COMPOSER-TEST":   `^(\d+)\.(\d+)\.\d+-(\w+)$`,   // E.g. 1.1.0-beta1
 	}
 
 	V.Major, V.Tag = coreVersion, ""
@@ -112,9 +113,13 @@ func (V *SemVersion) initContrib(coreVersion int, rawVersion string) {
 				V.Patch, _ = strconv.Atoi(matches[2])
 				V.Tag = matches[3]
 				foundMatch = true
-			case "PARTIAL-DEV", "DRUPAL-DRUSH-DEV", "DRUPAL-DEV":
+			case "DRUPAL-DRUSH":
 				V.Minor, _ = strconv.Atoi(matches[1])
-				V.Patch, V.Tag = -1, "dev"
+				V.Patch = -1
+				foundMatch = true
+			case "PARTIAL-DEV", "DRUPAL-DEV", "GIT-HASH":
+				V.Minor, _ = strconv.Atoi(matches[1])
+				V.Patch, V.Tag = -1, matches[2]
 				foundMatch = true
 			}
 		}
@@ -127,13 +132,16 @@ func (V *SemVersion) initContrib(coreVersion int, rawVersion string) {
 }
 
 // Prepare a component with various conditional initialisers.
-func (C *Component) init(coreVersion int, rawVersion string, componentType string) {
+func (C *Component) init(coreVersion int, rawVersion string, componentName string, componentType string) {
 	switch componentType {
 	case CORE:
 		C.Version.initCore(rawVersion)
 	case MODULE:
+		fallthrough
 	case THEME:
-		C.Version.initContrib(coreVersion, rawVersion)
+		C.Version.initContribVersion(coreVersion, rawVersion)
+		C.Name = componentName
+		C.Type = componentType
 	}
 }
 

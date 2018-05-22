@@ -17,8 +17,8 @@ var testCoreVersions = []struct {
 	success bool
 }{
 	// Core version denominations.
-	{"6.13", SemVersion{6, 13, 0, ""}, true},
-	{"6.13", SemVersion{5, 13, 0, ""}, false},
+	{"6.13", SemVersion{6, 0, 13, ""}, true},
+	{"6.13", SemVersion{5, 0, 13, ""}, false},
 	{"7.0", SemVersion{7, 0, 0, ""}, true},
 	{"8.3.4", SemVersion{8, 3, 4, ""}, true},
 	{"8.0.0", SemVersion{8, 0, 0, ""}, true},

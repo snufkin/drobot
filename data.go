@@ -17,7 +17,7 @@ type Component struct {
 type SemVersion struct {
 	Major int // Used as the core version for contrib
 	Minor int
-	Patch int
+	Patch int // D7 uses Patch for minor.
 	Tag   string
 }
 
@@ -33,7 +33,7 @@ const MANIFEST_COMPOSER = "json"
 
 // Convert a semantic version to the d.o format.
 func (V SemVersion) printVersion(componentType string, majorVersion int) string {
-	if V.Major < 0 || V.Minor < 0 || V.Patch < 0 {
+	if V.Major < 0 && V.Minor < 0 && V.Patch < 0 {
 		return fmt.Sprintf("Invalid version")
 	}
 	switch componentType {
@@ -41,7 +41,7 @@ func (V SemVersion) printVersion(componentType string, majorVersion int) string 
 		if majorVersion == 8 {
 			return fmt.Sprintf("%d.%d.%d", V.Major, V.Minor, V.Patch)
 		} else {
-			return fmt.Sprintf("%d.%d", V.Major, V.Minor)
+			return fmt.Sprintf("%d.%d", V.Major, V.Patch)
 		}
 	case MODULE:
 		return fmt.Sprintf("%d.x-%d.%d", V.Major, V.Minor, V.Patch)
@@ -72,7 +72,7 @@ func (V *SemVersion) initCore(rawVersion string) {
 		V.Major, V.Minor, V.Patch = -1, -1, -1
 	} else if len(parts) == 2 {
 		fmt.Sscanf(parts[0], "%d", &V.Major)
-		fmt.Sscanf(parts[1], "%d", &V.Minor)
+		fmt.Sscanf(parts[1], "%d", &V.Patch) // 7.44 resolves to 7.0.44
 	} else if len(parts) == 3 {
 		fmt.Sscanf(parts[0], "%d", &V.Major)
 		fmt.Sscanf(parts[1], "%d", &V.Minor)

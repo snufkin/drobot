@@ -212,7 +212,3 @@ func TestContribVersionParser(t *testing.T) {
 		}
 	}
 }
-
-func TestParseMakefile(t *testing.T) {
-	parseMakefile("test/test.make")
-}

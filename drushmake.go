@@ -4,41 +4,45 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/go-ini/ini"
+	"io/ioutil"
 	"regexp"
 	"strings"
 )
 
-// Parse a makefile on filePath and return the list of modules, themes and core.
-func parseMakefile(filePath string) {
+// Parse a makefile and populate the manifest.
+func (M *Manifest) parseMakefile(filePath string) {
 	cfg, err := ini.Load(filePath)
 	if err != nil {
 		fmt.Printf("Fail to read file: %v", err)
 	}
+	// 0. Identify the core version and initialise the manifest.
+	// 1. Identify the list of components.
+	// 2. Extract the block relevant for each component.
+	// 3. Process each block and populate the manifest.
 
-	// keys := cfg.Section("").Keys()
-	// names := cfg.Section("").KeyStrings()
-	hash := cfg.Section("").KeysHash()
-	var componentList []string
+	// 0. Extract the core information and init the manifest.
+	rawCoreVersion := cfg.Section("").Key("core")
+	core := Component{}
+	// Core initialisation does not require an accurate core version, this will
+	// be extracted from the raw version number.
+	core.init(0, rawCoreVersion.Value(), "drupal", CORE)
 
-	for key, val := range hash {
-		// fmt.Println(keyMapper(key))
-		if componentName := keyMapper(key); componentName != "" && val != "core" {
-			componentList = append(componentList, componentName)
-			// fmt.Printf("%v => %v\n", componentName, val)
-		}
+	M.Components = append(M.Components, core)
+
+	b, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		fmt.Print(err)
 	}
+	componentList := componentList(string(b))
 
-	// Grab core information
-	// rawCoreVersion := cfg.Section("").Key("core")
-	// core := Component{CORE, "drupal", parseVersion(rawCoreVersion.Value(), 7)}
-
-	// version := SemVersion{}
-	// version.init(rawCoreVersion.Value())
-	// core := Component{CORE, "drupal", version}
-
-	// fmt.Printf("%v\n", core.printVersion())
+	for _, cName := range componentList {
+		c := Component{}
+		c.blockToComponentParser(findBlock(cName, string(b)), core.Version.Major)
+		M.Components = append(M.Components, c)
+	}
 }
 
+// Helper function to extract the project name from a component block.
 func keyMapper(key string) string {
 	match, start, end := strings.Index(key, "projects["), strings.Index(key, "["), strings.Index(key, "]")
 	if match == 0 && start > 0 && end > 0 {
@@ -138,15 +142,16 @@ func componentList(rawBlock string) (componentList []string) {
 }
 
 // Find a code block which contains a certain component key.
-func findBlock(component string) (componentBlock string) {
-	scanner := bufio.NewScanner(strings.NewReader(componentBlock))
+func findBlock(cName string, rawBlock string) (componentBlock string) {
+	scanner := bufio.NewScanner(strings.NewReader(rawBlock))
+	componentBlock = ""
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		// Find a line which contains our keyword.
-		if match := strings.Index(line, fmt.Sprintf("projects[%s]", component)); match > -1 {
-			component += line + "\n"
+		if match := strings.Index(line, fmt.Sprintf("projects[%s]", cName)); match > -1 {
+			componentBlock += line + "\n"
 		}
 	}
-	return
+	return componentBlock
 }

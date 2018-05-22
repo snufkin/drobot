@@ -136,6 +136,8 @@ func (C *Component) init(coreVersion int, rawVersion string, componentName strin
 	switch componentType {
 	case CORE:
 		C.Version.initCore(rawVersion)
+		C.Name = componentName
+		C.Type = componentType
 	case MODULE:
 		fallthrough
 	case THEME:
@@ -143,20 +145,6 @@ func (C *Component) init(coreVersion int, rawVersion string, componentName strin
 		C.Name = componentName
 		C.Type = componentType
 	}
-}
-
-// Initialise a manifest list out of the raw txt from the yaml file.
-func (M *Manifest) initFromMake(rawBlock string) {
-	//1. Identify the names of the projects
-	//2. Extract all variations of keys (assumption and may break)
-	componentList := componentList(rawBlock)
-
-	for _, component := range componentList {
-		block := findBlock(component)
-		println(block)
-	}
-	// Find the string block that contains each components and initialise the component.
-
 }
 
 // Collect a manifest list.

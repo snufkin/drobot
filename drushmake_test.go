@@ -1,7 +1,7 @@
 package main
 
 import (
-	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -148,11 +148,28 @@ var testComponentList = struct {
 
 // Test the processing of the complete string block.
 func TestMakefileToComponentParser(t *testing.T) {
-	t.Skip("Skipping test in debug mode")
-	if components := componentList(testComponentList.in); !reflect.DeepEqual(components, testComponentList.out) {
+	if components := componentList(testComponentList.in); !LazyArrayEqual(components, testComponentList.out) {
 		t.Error("For", testComponentList.in, "expected", testComponentList.out, "got", components)
 	}
 }
+
+func LazyArrayEqual(a []string, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	sort.Sort(sort.StringSlice(a))
+	sort.Sort(sort.StringSlice(b))
+
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// Helper function to compare arrays.
 
 // Test if component blocks are correctly parsed and populated.
 func TestBlockToComponentParser(t *testing.T) {
@@ -163,7 +180,6 @@ func TestBlockToComponentParser(t *testing.T) {
 		if success := (testComponent == testBlock.out); testComponent != testBlock.out && success != testBlock.success {
 			t.Error("For", testBlock.in, "expected", testBlock.out, "got", testComponent)
 		}
-
 	}
 }
 

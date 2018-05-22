@@ -67,17 +67,3 @@ func fetchRelease(cName string, coreVersion int) Result {
 
 	return r
 }
-
-// Check the update status for a given manifest element.
-func (C Component) checkUpdate() {
-	release := fetchRelease(C.Name, C.Version.Major)
-	latestRelease := release.Releases[0]
-	if latestRelease.Patch > C.Version.Patch {
-		fmt.Printf("Component %s is outdated %v => %v\n", C.Name, C.Version, latestRelease)
-	}
-}
-
-// Compare two versions and return a status evaluation.
-func (C Component) status() {
-
-}

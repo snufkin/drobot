@@ -48,19 +48,27 @@ func keyMapper(key string) string {
 	}
 }
 
+type blockInfo struct {
+	Name     string
+	Version  string
+	Type     string
+	Revision string
+}
+
 // Parse a string block which belongs to a single component and return the Component.
 func (C *Component) blockToComponentParser(block string, coreVersion int) {
 	var versionLocation = map[string]string{
 		"BASIC":    `^projects\[(\w+)\]\s?=\s?(\S+)$`,                         // projects[views] = 3.14
 		"VERSION":  `^projects\[(\w+)\]\[version\]\s?=\s?(\S+)$`,              // projects[nodequeue][version] = 2.0-alpha1
 		"BRANCH":   `^projects\[(\w+)\]\[download\]\[branch\]\s?=\s?(\S+)$`,   // projects[ns_core][download][branch] = 7.x-2.x
+		"TYPE":     `^projects\[(\w+)\]\[download\]\[type\]\s?=\s?(\S+)$`,     // projects[ns_core][download][type] = git
 		"REVISION": `^projects\[(\w+)\]\[download\]\[revision\]\s?=\s?(\S+)$`, // projects[draggableviews][download][revision] = 9677bc18b7255e13c33ac3cca48732b855c6817d
 	}
 
 	componentName := keyMapper(block)
-	var version string
-	var revision string
+	component := blockInfo{Name: componentName}
 
+	// We assume that a single block will reference a single component, see the continue.
 	scanner := bufio.NewScanner(strings.NewReader(block))
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -70,39 +78,35 @@ func (C *Component) blockToComponentParser(block string, coreVersion int) {
 			if isMatch := re.MatchString(line); isMatch {
 				matches := re.FindStringSubmatch(line)
 
-				// Sanity check for entries not for a single project.
-				if matches[1] != componentName {
+				// Sanity check for entries not for a single project. All regex captures the name as match[1].
+				if matches[1] != component.Name {
 					continue
 				}
 
-				// Do not overwrite the version variable when the revision value is captured.
-				if rowType == "REVISION" {
-					revision = matches[2]
-				} else {
-					version = matches[2]
+				// Populate the right components within the struct.
+				switch rowType {
+				case "BASIC", "VERSION", "BRANCH":
+					component.Version = matches[2]
+				case "TYPE":
+					component.Type = matches[2]
+				case "REVISION":
+					component.Revision = matches[2]
 				}
-
-				// Make adjustments to the processed variables based on aggreageted information.
-				if rowType == "BRANCH" {
-					version = version + "-git"
-				}
-
-				fmt.Println(matches)
 			}
 		}
 	}
-	if revision != "" {
-		version = version + "-git:" + revision
+
+	C.init(coreVersion, component.String(), component.Name, MODULE)
+}
+
+func (b blockInfo) String() string {
+	if b.Type != "" && b.Revision != "" { // Revision and Type set.
+		return fmt.Sprintf("%s-%s:%s", b.Version, b.Type, b.Revision)
+	} else if b.Type != "" && b.Revision == "" {
+		return fmt.Sprintf("%s-%s", b.Version, b.Type)
+	} else {
+		return fmt.Sprintf("%s", b.Version)
 	}
-
-	C.init(coreVersion, version, componentName, MODULE)
-
-	// Structure variations:
-	// 1. oneliner with version
-	// 2. multiple lines with explicit version
-	// 3. multiple lines with git
-	// 3. multiple lines with git and hah
-	// 5. multiple lines with dev version
 }
 
 // Helper function to determine the applicable structure.

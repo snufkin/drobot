@@ -129,7 +129,7 @@ func componentList(rawBlock string) (componentList []string) {
 	for scanner.Scan() {
 		key := keyMapper(scanner.Text())
 
-		if key == "" { // Skip empty lines.
+		if key == "" || key == "drupal" { // Skip empty, or core lines.
 			continue
 		} else if _, no := components[key]; key != "" && !bool(no) {
 			components[key] = true

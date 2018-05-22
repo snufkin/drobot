@@ -61,19 +61,11 @@ func fetchRelease(cName string, coreVersion int) Result {
 	// I really did not want to write a custom unmarhsaller.
 	if cName != "drupal" {
 		for k, c := range r.Releases {
-			r.Releases[k].Minor = c.Major
-			r.Releases[k].Major = coreVersion
+			r.Releases[k].Minor, r.Releases[k].Major = c.Major, coreVersion
 		}
 	}
 
 	return r
-
-	// if cName == "drupal" {
-	// 	fmt.Printf("Name: %#v\n", r.Name)
-	// 	fmt.Printf("Type: %#v\n", r.Type)
-	// 	fmt.Printf("Recommended major: %#v\n", r.RecommendedMajor)
-	// 	fmt.Printf("Release history: %#v\n", r.Releases)
-	// }
 }
 
 // Check the update status for a given manifest element.

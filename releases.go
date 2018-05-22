@@ -81,7 +81,7 @@ func (C Component) checkUpdate() {
 	release := fetchRelease(C.Name, C.Version.Major)
 	latestRelease := release.Releases[0]
 	if latestRelease.Patch > C.Version.Patch {
-		fmt.Printf("Component %s is outdated %s => %v\n", C.Name, C.printVersion(), latestRelease)
+		fmt.Printf("Component %s is outdated %v => %v\n", C.Name, C.Version, latestRelease)
 	}
 }
 

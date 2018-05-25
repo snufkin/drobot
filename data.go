@@ -22,7 +22,7 @@ type SemVersion struct {
 	Tag   string // Additional information such as rc1, git, dev.
 }
 
-// Representation of the whole manifest.
+// Manifest holds the complete list of components as parsed from the file.
 type Manifest struct {
 	Components []Component
 }
@@ -44,9 +44,8 @@ func (V SemVersion) printVersion(componentType string, majorVersion int) string 
 	case CORE:
 		if majorVersion == 8 {
 			return fmt.Sprintf("%d.%d.%d", V.Major, V.Minor, V.Patch)
-		} else {
-			return fmt.Sprintf("%d.%d", V.Major, V.Patch)
 		}
+		return fmt.Sprintf("%d.%d", V.Major, V.Patch)
 	case MODULE:
 		return fmt.Sprintf("%d.x-%d.%d", V.Major, V.Minor, V.Patch)
 	case THEME:

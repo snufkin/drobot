@@ -18,6 +18,7 @@ type Release struct {
 	Major int    `xml:"version_major"`
 	Minor int    `xml:"version_minor"`
 	Patch int    `xml:"version_patch"`
+	Tag   string `xml:"version_extra"`
 	Terms []Term `xml:"terms>term"`
 }
 
@@ -33,12 +34,17 @@ type Result struct {
 // Example: https://updates.drupal.org/release-history/drupal/7.x
 const RELEASE_URL = `https://updates.drupal.org/release-history`
 
-func fetchRelease(cName string, coreVersion int) Result {
-	url := fmt.Sprintf("%s/%s/%d.x", RELEASE_URL, cName, coreVersion)
+func (r Release) String() string {
+	if r.Tag == "" {
+		return fmt.Sprintf("%d.%d.%d", r.Major, r.Minor, r.Patch)
+	}
+	return fmt.Sprintf("%d.%d.%d-%s", r.Major, r.Minor, r.Patch, r.Tag)
+}
+
+func fetchRelease(name string, coreVersion int) Result {
+	url := fmt.Sprintf("%s/%s/%d.x", RELEASE_URL, name, coreVersion)
 
 	r := Result{Name: "", Type: ""}
-
-	// data, err := ioutil.ReadFile("test/drupal-7.x.xml")
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -59,7 +65,7 @@ func fetchRelease(cName string, coreVersion int) Result {
 
 	// If the release was NOT core, then rearrange the structure.
 	// I really did not want to write a custom unmarhsaller.
-	if cName != "drupal" {
+	if name != "drupal" {
 		for k, c := range r.Releases {
 			r.Releases[k].Minor, r.Releases[k].Major = c.Major, coreVersion
 		}

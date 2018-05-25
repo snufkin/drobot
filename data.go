@@ -58,6 +58,13 @@ func (C Component) printVersion() string {
 	return C.Version.printVersion(C.Type, C.Version.Major)
 }
 
+func (V SemVersion) String() string {
+	if V.Tag == "" {
+		return fmt.Sprintf("%d.%d.%d", V.Major, V.Minor, V.Patch)
+	}
+	return fmt.Sprintf("%d.%d.%d-%s", V.Major, V.Minor, V.Patch, V.Tag)
+}
+
 func parseVersion(rawVersion string, majorVersion int) SemVersion {
 	version := new(SemVersion)
 	if majorVersion == 7 {
@@ -148,8 +155,4 @@ func (C *Component) init(coreVersion int, rawVersion string, componentName strin
 		C.Name = componentName
 		C.Type = componentType
 	}
-}
-
-// Collect a manifest list.
-func (M *Manifest) append(component Component) {
 }

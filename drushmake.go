@@ -112,14 +112,6 @@ func (b blockInfo) String() string {
 	}
 }
 
-// Helper function to determine the applicable structure.
-func definitionClassifier(block string) {
-	// project[component] = VERSION
-	// project[component][download][type][git]
-	// project[component][download][type][git][branch]
-	// project[component][download][type][git][revision]
-}
-
 // Build a list of deduped project names out of a raw projects[name] block.
 func componentList(rawBlock string) (componentList []string) {
 	components := make(map[string]bool)
@@ -141,14 +133,14 @@ func componentList(rawBlock string) (componentList []string) {
 }
 
 // Find a code block which contains a certain component key.
-func findBlock(cName string, rawBlock string) (componentBlock string) {
+func findBlock(name string, rawBlock string) (componentBlock string) {
 	scanner := bufio.NewScanner(strings.NewReader(rawBlock))
 	componentBlock = ""
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		// Find a line which contains our keyword.
-		if match := strings.Index(line, fmt.Sprintf("projects[%s]", cName)); match > -1 {
+		if match := strings.Index(line, fmt.Sprintf("projects[%s]", name)); match > -1 {
 			componentBlock += line + "\n"
 		}
 	}

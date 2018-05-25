@@ -7,29 +7,33 @@ import (
 	"strings"
 )
 
+// Component type, e.g. module, core etc.
 type Component struct {
-	// Component type, e.g. module, core etc.
 	Type    string
 	Name    string
 	Version SemVersion
 }
 
+// Storage for the converted semantic-ish version of the component.
 type SemVersion struct {
-	Major int // Used as the core version for contrib
+	Major int // Note: core version for contrib.
 	Minor int
-	Patch int // D7 uses Patch for minor.
-	Tag   string
+	Patch int    // Note: D7 uses Patch (e.g. 7.44 is 7.0.44)
+	Tag   string // Additional information such as rc1, git, dev.
 }
 
+// Representation of the whole manifest.
 type Manifest struct {
 	Components []Component
 }
 
-const CORE = "core"
-const MODULE = "module"
-const THEME = "theme"
-const MANIFEST_MAKE = "make"
-const MANIFEST_COMPOSER = "json"
+const (
+	CORE              = "core"   // Represents Drupal core itself.
+	MODULE            = "module" // Plugin type is module.
+	THEME             = "theme"  // Plugin type is theme.
+	MANIFEST_MAKE     = "make"   // The manifest file is in drush make format.
+	MANIFEST_COMPOSER = "json"   // The manifest file is a composer.lock file.
+)
 
 // Convert a semantic version to the d.o format.
 func (V SemVersion) printVersion(componentType string, majorVersion int) string {

@@ -47,9 +47,8 @@ func keyMapper(key string) string {
 	match, start, end := strings.Index(key, "projects["), strings.Index(key, "["), strings.Index(key, "]")
 	if match == 0 && start > 0 && end > 0 {
 		return key[start+1 : end]
-	} else {
-		return ""
 	}
+	return ""
 }
 
 type blockInfo struct {

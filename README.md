@@ -1,4 +1,5 @@
 [ ![Codeship Status for snufkin/drobot](https://app.codeship.com/projects/a3f473f0-3fcd-0136-942a-6a4ec1b9b8d8/status?branch=master)](https://app.codeship.com/projects/290926)
+[![Go Report Card](https://goreportcard.com/badge/github.com/snufkin/drobot)](https://goreportcard.com/report/github.com/snufkin/drobot)
 
 # Overview
 The purpose of this utility is to check what components are outdated in a Drupal

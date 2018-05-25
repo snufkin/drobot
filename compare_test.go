@@ -8,9 +8,9 @@ var testStableVersion = Component{"module", "views", SemVersion{7, 3, 4, ""}}
 var testDevVersion = Component{"module", "views", SemVersion{7, 3, -1, "dev"}}
 var testGitVersion = Component{"module", "views", SemVersion{7, 3, -1, "git"}}
 var testBetaVersionList = []Component{
-	Component{"module", "views", SemVersion{7, 3, 4, "rc1"}},
-	Component{"module", "views", SemVersion{7, 3, 4, "beta5"}},
-	Component{"module", "views", SemVersion{7, 3, 4, "alpha5"}},
+	{"module", "views", SemVersion{7, 3, 4, "rc1"}},
+	{"module", "views", SemVersion{7, 3, 4, "beta5"}},
+	{"module", "views", SemVersion{7, 3, 4, "alpha5"}},
 }
 
 func TestIsGit(t *testing.T) {

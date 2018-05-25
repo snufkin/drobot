@@ -129,11 +129,11 @@ var testFullComponentList = struct {
 	in: testMakefile,
 	out: Manifest{
 		[]Component{
-			Component{"module", "media", SemVersion{7, 2, -1, "dev"}},
-			Component{"module", "media_youtube", SemVersion{7, 1, 0, "alpha5"}},
-			Component{"module", "media_flickr", SemVersion{7, 1, 0, "alpha1"}},
-			Component{"theme", "rubik", SemVersion{7, 4, 0, "beta7"}},
-			Component{"module", "nodequeue", SemVersion{7, 2, 0, "alpha1"}},
+			{"module", "media", SemVersion{7, 2, -1, "dev"}},
+			{"module", "media_youtube", SemVersion{7, 1, 0, "alpha5"}},
+			{"module", "media_flickr", SemVersion{7, 1, 0, "alpha1"}},
+			{"theme", "rubik", SemVersion{7, 4, 0, "beta7"}},
+			{"module", "nodequeue", SemVersion{7, 2, 0, "alpha1"}},
 		},
 	},
 }

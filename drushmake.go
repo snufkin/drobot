@@ -135,7 +135,7 @@ func componentList(rawBlock string) (componentList []string) {
 			components[key] = true
 		}
 	}
-	for name, _ := range components {
+	for name := range components {
 		componentList = append(componentList, name)
 	}
 	return

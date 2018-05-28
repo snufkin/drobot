@@ -57,17 +57,17 @@ func (C Component) checkUpdateStatus(r Release) int {
 		}
 	}
 
-	// Git version and stable available.
+	// When stable is available but is not used.
 	if !C.isStable() && r.Tag == "" && &r.Minor != nil {
 		return STABLE_AVAILABLE
 	} else if C.isStable() && r.Minor > C.Version.Minor { // Minor update available.
 		return STABLE_MAJOR_AVAILABLE
 	} else if C.isStable() && r.Minor == C.Version.Minor && r.Patch > C.Version.Patch {
 		return UPDATE_AVAILABLE
-	} else if C.isDev() && r.Tag != "" && r.Tag != "dev" { // Beta available.
+	} else if C.isDev() && rIsBeta(r.Tag) { // Beta available.
 		return BETA_AVAILABLE
-	} else if C.isBeta() && r.Tag != "" && r.Tag != "dev" {
-		// Both are the same type of beta release.
+	} else if C.isBeta() && rIsBeta(r.Tag) { // Both releases are betas.
+
 		re := regexp.MustCompile("^(rc|beta|alpha)([0-9]+)$")
 
 		currentTagMatches, releaseTagMatches := re.FindStringSubmatch(C.Version.Tag), re.FindStringSubmatch(r.Tag)
@@ -80,9 +80,16 @@ func (C Component) checkUpdateStatus(r Release) int {
 		} else if currentTag == "beta" && releaseTag == "rc" {
 			return BETA_AVAILABLE
 		}
+	} else if C.isGit() && r.Tag != "dev" {
+		return BETA_AVAILABLE
 	}
 
 	return UNKNOWN
+}
+
+// Shortcut to a beta release.
+func rIsBeta(tag string) bool {
+	return tag != "" && tag != "dev"
 }
 
 func (C Component) isGit() bool {

@@ -42,10 +42,10 @@ func (M Manifest) compare() {
 
 // Check the update status for a given manifest element. TODO don't print here cmon.
 func (C Component) checkUpdate() {
-	release := fetchRelease(C.Name, C.Version.Major)
-	status := C.checkUpdateStatus(release.Releases[0])
+	releases := C.fetchReleases()
+	status := C.checkUpdateStatus(releases.Releases[0])
 
-	fmt.Printf("[%s]\t%s\t%s\t%s\t%s\n", messages[status].short, messages[status].long, C.Name, C.Version, release.Releases[0])
+	fmt.Printf("[%s]\t%s\t%s\t%s\t%s\n", messages[status].short, messages[status].long, C.Name, C.Version, releases.Releases[0])
 }
 
 // Compare two versions and assign a status to the component.

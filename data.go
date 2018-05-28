@@ -67,7 +67,7 @@ func (V SemVersion) String() string {
 
 func parseVersion(rawVersion string, majorVersion int) SemVersion {
 	version := new(SemVersion)
-	if majorVersion == 7 {
+	if majorVersion < 8 {
 		fmt.Sscanf(rawVersion, "%d.%d", &version.Major, &version.Minor)
 	}
 	return *version

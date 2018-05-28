@@ -8,5 +8,4 @@ func main() {
 	registry := commander.NewCommandRegistry()
 	registry.Register(ParseMakefile)
 	registry.Execute()
-
 }

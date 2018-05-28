@@ -64,6 +64,8 @@ func (C Component) checkUpdateStatus(r Release) int {
 		return STABLE_MAJOR_AVAILABLE
 	} else if C.isStable() && r.Minor == C.Version.Minor && r.Patch > C.Version.Patch {
 		return UPDATE_AVAILABLE
+	} else if r.Minor == C.Version.Minor && r.Patch == C.Version.Patch { // Same version.
+		return OK
 	} else if C.isDev() && rIsBeta(r.Tag) { // Beta available.
 		return BETA_AVAILABLE
 	} else if C.isBeta() && rIsBeta(r.Tag) { // Both releases are betas.
@@ -75,7 +77,7 @@ func (C Component) checkUpdateStatus(r Release) int {
 		releaseTag, releaseVersion := releaseTagMatches[1], releaseTagMatches[2]
 		if currentTag == releaseTag && releaseVersion > currentVersion {
 			return BETA_AVAILABLE
-		} else if currentTag == "alpha" && (releaseTag == "rc" && releaseTag == "beta") {
+		} else if currentTag == "alpha" && (releaseTag == "rc" || releaseTag == "beta") {
 			return BETA_AVAILABLE
 		} else if currentTag == "beta" && releaseTag == "rc" {
 			return BETA_AVAILABLE

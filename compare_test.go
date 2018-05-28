@@ -48,3 +48,49 @@ func TestIsStable(t *testing.T) {
 		t.Error("For", testGitVersion.Version, "expected", false, "got", ok)
 	}
 }
+
+var statusList = []struct {
+	release   Release
+	component Component
+	out       int
+	success   bool
+}{
+	{
+		release:   Release{Major: 7, Minor: 3, Patch: 4, Tag: ""},
+		component: Component{"module", "views", SemVersion{7, 3, 4, ""}},
+		out:       OK,
+		success:   true,
+	},
+	{
+		release:   Release{Major: 7, Minor: 3, Patch: 4, Tag: ""},
+		component: Component{"module", "views", SemVersion{7, 3, 3, ""}},
+		out:       UPDATE_AVAILABLE,
+		success:   true,
+	},
+	{
+		release:   Release{Major: 7, Minor: 3, Patch: 4, Tag: ""},
+		component: Component{"module", "views", SemVersion{7, 2, 4, ""}},
+		out:       STABLE_MAJOR_AVAILABLE,
+		success:   true,
+	},
+	{
+		release:   Release{Major: 7, Minor: 3, Patch: 1, Tag: ""},
+		component: Component{"module", "views", SemVersion{7, 3, -1, "dev"}},
+		out:       STABLE_AVAILABLE,
+		success:   true,
+	},
+	{
+		release:   Release{Major: 7, Minor: 3, Patch: 1, Tag: ""},
+		component: Component{"module", "views", SemVersion{7, 3, -1, "git"}},
+		out:       STABLE_AVAILABLE,
+		success:   true,
+	},
+}
+
+func TestCheckUpdateStatus(t *testing.T) {
+	for _, testCase := range statusList {
+		if status := testCase.component.checkUpdateStatus(testCase.release); (status == testCase.out) != testCase.success {
+			t.Error("For", testCase.component, "vs", testCase.release, "expected", messages[testCase.out].short, "got", messages[status].short)
+		}
+	}
+}

@@ -43,6 +43,7 @@ func (r Release) String() string {
 
 func (C *Component) fetchReleases() Result {
 	url := fmt.Sprintf("%s/%s/%d.x", RELEASE_URL, C.Name, C.Version.Major)
+	fmt.Println(url)
 
 	r := Result{Name: "", Type: ""}
 

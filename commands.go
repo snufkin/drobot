@@ -2,6 +2,9 @@ package main
 
 import (
 	"github.com/yitsushi/go-commander"
+	"log"
+	"os"
+	"strings"
 )
 
 // Parse struct is a representation of the Parse command.
@@ -12,8 +15,18 @@ type Parse struct {
 func (c *Parse) Execute(opts *commander.CommandHelper) {
 	manifest := Manifest{}
 	fileName := opts.Arg(0)
-	// Todo validate the file.
-	manifest.parseMakefile(fileName)
+
+	// TODO validate the file to see if we can even open it.
+
+	if isMake(fileName) {
+		manifest.parseMakefile(fileName)
+	} else if isLock(fileName) {
+		manifest.parseComposer(fileName)
+	} else {
+		log.Fatal("File type not supported")
+		os.Exit(1)
+	}
+
 	manifest.compare()
 }
 
@@ -30,4 +43,12 @@ func ParseMakefile(appName string) *commander.CommandWrapper {
 			},
 		},
 	}
+}
+
+func isLock(filename string) bool {
+	return strings.HasSuffix(filename, `.lock`)
+}
+
+func isMake(filename string) bool {
+	return strings.HasSuffix(filename, `.make`)
 }

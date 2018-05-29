@@ -43,7 +43,6 @@ func (r Release) String() string {
 
 func (C *Component) fetchReleases() Result {
 	url := fmt.Sprintf("%s/%s/%d.x", RELEASE_URL, C.Name, C.Version.Major)
-	fmt.Println(url)
 
 	r := Result{Name: "", Type: ""}
 
@@ -60,13 +59,16 @@ func (C *Component) fetchReleases() Result {
 	}
 
 	err = xml.Unmarshal([]byte(data), &r)
-	if err != nil {
+	if err != nil && resp.ContentLength == 127 {
+		fmt.Println("Project not found.")
+		r.Releases = []Release{}
+	} else if err != nil {
 		fmt.Printf("marshal error: %v", err)
 	}
 
 	// If the release was NOT core, then rearrange the structure.
 	// I really did not want to write a custom unmarhsaller.
-	if C.Name != "drupal" {
+	if C.Name != "drupal" && len(r.Releases) > 0 {
 		for k, rls := range r.Releases {
 			r.Releases[k].Minor, r.Releases[k].Major = rls.Major, C.Version.Major
 		}

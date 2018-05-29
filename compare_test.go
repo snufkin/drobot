@@ -85,6 +85,12 @@ var statusList = []struct {
 		out:       STABLE_AVAILABLE,
 		success:   true,
 	},
+	{
+		release:   Release{Major: 8, Minor: 2, Patch: 12, Tag: ""},
+		component: Component{"module", "coder", SemVersion{8, 8, 2, ""}},
+		out:       UNKNOWN,
+		success:   true,
+	},
 }
 
 func TestCheckUpdateStatus(t *testing.T) {

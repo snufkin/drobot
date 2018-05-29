@@ -73,14 +73,17 @@ func (C Component) checkUpdateStatus(r Release) int {
 		re := regexp.MustCompile("^(rc|beta|alpha)([0-9]+)$")
 
 		currentTagMatches, releaseTagMatches := re.FindStringSubmatch(C.Version.Tag), re.FindStringSubmatch(r.Tag)
-		currentTag, currentVersion := currentTagMatches[1], currentTagMatches[2]
-		releaseTag, releaseVersion := releaseTagMatches[1], releaseTagMatches[2]
-		if currentTag == releaseTag && releaseVersion > currentVersion {
-			return BETA_AVAILABLE
-		} else if currentTag == "alpha" && (releaseTag == "rc" || releaseTag == "beta") {
-			return BETA_AVAILABLE
-		} else if currentTag == "beta" && releaseTag == "rc" {
-			return BETA_AVAILABLE
+		if len(currentTagMatches) == 3 && len(releaseTagMatches) == 3 {
+			currentTag, currentVersion := currentTagMatches[1], currentTagMatches[2]
+			releaseTag, releaseVersion := releaseTagMatches[1], releaseTagMatches[2]
+
+			if currentTag == releaseTag && releaseVersion > currentVersion {
+				return BETA_AVAILABLE
+			} else if currentTag == "alpha" && (releaseTag == "rc" || releaseTag == "beta") {
+				return BETA_AVAILABLE
+			} else if currentTag == "beta" && releaseTag == "rc" {
+				return BETA_AVAILABLE
+			}
 		}
 	} else if C.isGit() && r.Tag != "dev" {
 		return BETA_AVAILABLE

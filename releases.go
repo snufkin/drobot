@@ -60,7 +60,7 @@ func (C *Component) fetchReleases() Result {
 
 	err = xml.Unmarshal([]byte(data), &r)
 	if err != nil {
-		fmt.Printf("error: %v", err)
+		fmt.Printf("marshal error: %v", err)
 	}
 
 	// If the release was NOT core, then rearrange the structure.

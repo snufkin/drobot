@@ -23,7 +23,7 @@ type message struct {
 }
 
 var messages = map[int]message{
-	UNKNOWN:                {short: "UNKOWN", long: "Version difference not implemented"},
+	UNKNOWN:                {short: "UNKNOWN", long: "Version difference not implemented"},
 	OK:                     {short: "OK", long: "No update required."},
 	STABLE_AVAILABLE:       {short: "UPDATE AVAILABLE", long: "Stable release is available, while using non-pinned, update advised."},
 	UPDATE_AVAILABLE:       {short: "UPDATE AVAILABLE", long: "Update is available."},

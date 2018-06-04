@@ -8,8 +8,8 @@ import (
 )
 
 func (M *Manifest) parseComposer(path string) {
-	lock := clp.ComposerInfo{PathToLockFile: path}
-	lock.Parse()
+	lock := clp.ComposerInfo{}
+	lock.Parse(path)
 	pList := lock.GetPackageListByPrefix("drupal")
 
 	for _, p := range pList {

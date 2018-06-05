@@ -4,7 +4,6 @@ import (
 	"testing"
 )
 
-
 var testCoreVersions = []struct {
 	in      string
 	out     SemVersion

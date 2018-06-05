@@ -60,9 +60,9 @@ func (C Component) printVersion() string {
 
 func (V SemVersion) String() string {
 	if V.Tag == "" {
-		return fmt.Sprintf("%d.%d.%d", V.Major, V.Minor, V.Patch)
+		return fmt.Sprintf("%d.x-%d.%d", V.Major, V.Minor, V.Patch)
 	}
-	return fmt.Sprintf("%d.%d.%d-%s", V.Major, V.Minor, V.Patch, V.Tag)
+	return fmt.Sprintf("%d.x-%d.%d-%s", V.Major, V.Minor, V.Patch, V.Tag)
 }
 
 func parseVersion(rawVersion string, majorVersion int) SemVersion {
@@ -148,9 +148,7 @@ func (C *Component) init(coreVersion int, rawVersion string, componentName strin
 		C.Version.initCore(rawVersion)
 		C.Name = componentName
 		C.Type = componentType
-	case MODULE:
-		fallthrough
-	case THEME:
+	case MODULE, THEME, "":
 		C.Version.initContribVersion(coreVersion, rawVersion)
 		C.Name = componentName
 		C.Type = componentType

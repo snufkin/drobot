@@ -19,7 +19,7 @@ func (c *Parse) Execute(opts *commander.CommandHelper) {
 	// TODO validate the file to see if we can even open it.
 
 	if isMake(fileName) {
-		manifest.parseMakefile(fileName)
+		manifest.parseMake(fileName)
 	} else if isLock(fileName) {
 		manifest.parseComposer(fileName)
 	} else {

@@ -17,7 +17,7 @@ version requirements. [Read the Golang install documentation](https://golang.org
 
 The following packages are required for `.make` and `composer.lock` support, respectively:
 1. github.com/snufkin/go-composerlockparser
-1. TODO: github.com/snufkin/go-drushmakeparser will be required once the library has been abstracted out of the current implementation.
+1. github.com/snufkin/go-drushmakeparser
 
 # Usage
 

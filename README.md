@@ -13,6 +13,12 @@ The purpose of this utility is to check what components are outdated in a Drupal
 Make sure you have a working Go environment. There should be no specific
 version requirements. [Read the Golang install documentation](https://golang.org/doc/install)
 
+# Dependencies
+
+The following packages are required for `.make` and `composer.lock` support, respectively:
+1. github.com/snufkin/go-composerlockparser
+1. TODO: github.com/snufkin/go-drushmakeparser will be required once the library has been abstracted out of the current implementation.
+
 # Usage
 
 Once you have the binary compiled the usage should be straightforward:

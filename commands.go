@@ -30,6 +30,7 @@ func (c *Parse) Execute(opts *commander.CommandHelper) {
 	manifest.compare()
 }
 
+// DrobotFileValidator checks if the file passed can be used.
 func DrobotFileValidator(c *commander.CommandHelper) {
 	if c.Arg(0) == "" {
 		panic("File not specified")
@@ -45,7 +46,7 @@ func DrobotFileValidator(c *commander.CommandHelper) {
 	}
 }
 
-// Command definition to initiate the parsing of a manifest file.
+// ParseMakeFile is the command definition, parses the manifest file.
 func ParseMakefile(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Parse{},

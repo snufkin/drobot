@@ -30,13 +30,30 @@ func (c *Parse) Execute(opts *commander.CommandHelper) {
 	manifest.compare()
 }
 
+func DrobotFileValidator(c *commander.CommandHelper) {
+	if c.Arg(0) == "" {
+		panic("File not specified")
+	}
+
+	info, err := os.Stat(c.Arg(0))
+	if err != nil {
+		panic("File not found")
+	}
+
+	if !info.Mode().IsRegular() {
+		panic("Not a regular file, can not process.")
+	}
+}
+
+// Command definition to initiate the parsing of a manifest file.
 func ParseMakefile(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Parse{},
+		Validator: DrobotFileValidator,
 		Help: &commander.CommandDescriptor{
 			Name:             "parse",
-			ShortDescription: "Parse a Drush makefile",
-			LongDescription:  `Parse a Drush makefile (composer.lock file is not supported)`,
+			ShortDescription: `Parse a site manifest file and report outdated components.`,
+			LongDescription:  `Process a Drush makefile, or composer.lock file and check each component against releases from drupal.org.`,
 			Arguments:        "<filename>",
 			Examples: []string{
 				"mysite.make",

@@ -14,7 +14,7 @@ type Component struct {
 	Version SemVersion
 }
 
-// Storage for the converted semantic-ish version of the component.
+// SemVersion is a uniform storage for Drupal component version - core and contrib.
 type SemVersion struct {
 	Major int // Note: core version for contrib.
 	Minor int
@@ -27,6 +27,7 @@ type Manifest struct {
 	Components []Component
 }
 
+// Classification constants representing various types.
 const (
 	CORE              = "core"   // Represents Drupal core itself.
 	MODULE            = "module" // Plugin type is module.

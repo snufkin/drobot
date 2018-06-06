@@ -8,12 +8,13 @@ import (
 	"net/http"
 )
 
+// Term maps to the taxonomy terms on releases.
 type Term struct {
 	Name  string `xml:"name"`
 	Value string `xml:"value"`
 }
 
-// Information about a single release.
+// Release holds information about a single release of a package.
 type Release struct {
 	Major int    `xml:"version_major"`
 	Minor int    `xml:"version_minor"`
@@ -22,7 +23,7 @@ type Release struct {
 	Terms []Term `xml:"terms>term"`
 }
 
-// The map of the release history response.
+// Result stores the release history response from drupal.org
 type Result struct {
 	XMLName          xml.Name  `xml:"project"`
 	Name             string    `xml:"short_name"`
@@ -31,7 +32,8 @@ type Result struct {
 	Releases         []Release `xml:"releases>release"`
 }
 
-// Example: https://updates.drupal.org/release-history/drupal/7.x
+// RELEASE_URL is the base URL where we get the release history from.
+// Example pattern: https://updates.drupal.org/release-history/drupal/7.x
 const RELEASE_URL = `https://updates.drupal.org/release-history`
 
 func (r Release) String() string {
